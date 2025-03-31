@@ -21,7 +21,7 @@ public class MixinHotbarRefill {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.currentScreen instanceof InventoryScreen) {
             if (GLFW.glfwGetMouseButton(mc.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_3) == GLFW.GLFW_PRESS) {
-                Item selectedItem = Registries.ITEM.get(new Identifier(HotbarRefill.selectedItem));
+                Item selectedItem = Registries.ITEM.get(Identifier.of("minecraft", HotbarRefill.selectedItem.split(":")[1]));
                 int itemInInventory = findItemInInventory(mc, selectedItem, 9, 36);
                 if (itemInInventory != -1) {
                     int emptyHotbarSlot = findEmptyHotbarSlot(mc);
