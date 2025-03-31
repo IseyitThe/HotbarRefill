@@ -12,7 +12,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 public class HotbarRefill implements ModInitializer {
-    public static String selectedItem = "minecraft:splash_potion";
+    public static String selectedItem = "minecraft:splash_potion"; //default selected item
 
     @Override
     public void onInitialize() {
@@ -22,7 +22,7 @@ public class HotbarRefill implements ModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.currentScreen instanceof InventoryScreen) {
                 if (GLFW.glfwGetMouseButton(client.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_3) == GLFW.GLFW_PRESS) {
-                    Item item = Registries.ITEM.get(Identifier.of("minecraft", selectedItem.split(":")[1]));
+                    Item item = Registries.ITEM.get(new Identifier(selectedItem));
                     int itemInInventory = findItemInInventory(client, item, 9, 36);
                     if (itemInInventory != -1) {
                         int emptyHotbarSlot = findEmptyHotbarSlot(client);
