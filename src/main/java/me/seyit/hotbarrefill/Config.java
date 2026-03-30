@@ -6,8 +6,8 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.DropdownMenuBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.registry.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,21 +19,21 @@ public class Config implements ModMenuApi {
         return parent -> {
             ConfigBuilder builder = ConfigBuilder.create()
                     .setParentScreen(parent)
-                    .setTitle(Text.literal("Hotbar Refill Config"));
+                    .setTitle(Component.literal("Hotbar Refill Config"));
 
-            ConfigCategory general = builder.getOrCreateCategory(Text.literal("General"));
+            ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
             ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-            general.addEntry(entryBuilder.startTextDescription(Text.literal("Hotbar Refill Configuration")).build());
+            general.addEntry(entryBuilder.startTextDescription(Component.literal("Hotbar Refill Configuration")).build());
 
-            List<String> itemNames = Registries.ITEM.stream()
-                    .map(item -> Registries.ITEM.getId(item).toString())
+            List<String> itemNames = BuiltInRegistries.ITEM.stream()
+                    .map(item -> BuiltInRegistries.ITEM.getKey(item).toString())
                     .sorted()
                     .collect(Collectors.toList());
 
             DropdownMenuBuilder<String> itemDropdownMenu = entryBuilder
-                    .startDropdownMenu(Text.literal("Select Item"), DropdownMenuBuilder.TopCellElementBuilder.of(HotbarRefill.selectedItem, name -> name))
+                    .startDropdownMenu(Component.literal("Select Item"), DropdownMenuBuilder.TopCellElementBuilder.of(HotbarRefill.selectedItem, name -> name))
                     .setDefaultValue("minecraft:splash_potion")
                     .setSelections(itemNames)
                     .setSuggestionMode(false)

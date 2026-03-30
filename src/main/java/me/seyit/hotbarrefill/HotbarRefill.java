@@ -1,56 +1,85 @@
 package me.seyit.hotbarrefill;
 
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
-public class HotbarRefill implements ModInitializer {
+public class HotbarRefill implements ClientModInitializer {
     public static String selectedItem = "minecraft:splash_potion";
 
     @Override
-    public void onInitialize() {
-        System.out.println("Hotbar Refill initialized");
+    public void onInitializeClient() {
         Config.init();
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.currentScreen instanceof InventoryScreen) {
-                if (GLFW.glfwGetMouseButton(client.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_3) == GLFW.GLFW_PRESS) {
-                    Item item = Registries.ITEM.get(Identifier.of("minecraft", selectedItem.split(":")[1]));
-                    int itemInInventory = findItemInInventory(client, item, 9, 36);
-                    if (itemInInventory != -1) {
-                        int emptyHotbarSlot = findEmptyHotbarSlot(client);
-                        if (emptyHotbarSlot != -1) {
-                            client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, itemInInventory, emptyHotbarSlot - 36, SlotActionType.SWAP, client.player);
-                        }
-                    }
-                }
-            }
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(this::handleClientTick);
     }
 
-    private int findItemInInventory(MinecraftClient client, Item item, int startSlot, int endSlot) {
+    private void handleClientTick(Minecraft client) {
+        if (client.player == null || client.gameMode == null) {
+            return;
+        }
+
+        if (!(client.screen instanceof InventoryScreen)) {
+            return;
+        }
+
+        if (GLFW.glfwGetMouseButton(client.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_3) != GLFW.GLFW_PRESS) {
+            return;
+        }
+
+        Identifier itemId = Identifier.tryParse(selectedItem);
+        if (itemId == null) {
+            return;
+        }
+
+        Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
+        if (item == null) {
+            return;
+        }
+
+        int itemInInventory = findItemInInventory(client, item, 9, 36);
+        if (itemInInventory == -1) {
+            return;
+        }
+
+        int emptyHotbarSlot = findEmptyHotbarSlot(client);
+        if (emptyHotbarSlot == -1) {
+            return;
+        }
+
+        client.gameMode.handleContainerInput(
+                client.player.containerMenu.containerId,
+                itemInInventory,
+                emptyHotbarSlot - 36,
+                ContainerInput.SWAP,
+                client.player
+        );
+    }
+
+    private int findItemInInventory(Minecraft client, Item item, int startSlot, int endSlot) {
         for (int i = startSlot; i < endSlot; i++) {
-            ItemStack stack = client.player.getInventory().getStack(i);
+            ItemStack stack = client.player.getInventory().getItem(i);
             if (stack.getItem() == item) {
                 return i;
             }
         }
+
         return -1;
     }
 
-    private int findEmptyHotbarSlot(MinecraftClient client) {
+    private int findEmptyHotbarSlot(Minecraft client) {
         for (int i = 0; i < 9; i++) {
-            if (client.player.getInventory().getStack(i).isEmpty()) {
+            if (client.player.getInventory().getItem(i).isEmpty()) {
                 return i + 36;
             }
         }
+
         return -1;
     }
 }
