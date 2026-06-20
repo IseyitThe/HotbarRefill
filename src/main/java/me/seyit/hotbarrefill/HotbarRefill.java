@@ -25,7 +25,7 @@ public class HotbarRefill implements ClientModInitializer {
             return;
         }
 
-        if (!(client.screen instanceof InventoryScreen)) {
+        if (!(client.gui.screen() instanceof InventoryScreen)) {
             return;
         }
 
