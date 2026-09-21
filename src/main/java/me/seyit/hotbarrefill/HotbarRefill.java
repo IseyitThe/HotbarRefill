@@ -9,7 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 public class HotbarRefill implements ClientModInitializer {
     public static String selectedItem = "minecraft:splash_potion";
@@ -29,7 +29,7 @@ public class HotbarRefill implements ClientModInitializer {
             return;
         }
 
-        if (GLFW.glfwGetMouseButton(client.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_3) != GLFW.GLFW_PRESS) {
+        if ((SDLMouse.SDL_GetMouseState(null, null) & SDLMouse.SDL_BUTTON_MMASK) == 0) {
             return;
         }
 
